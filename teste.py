@@ -1,4 +1,4 @@
-i = 0
-while i < 10:
-    i += 1
-    print(i) 
+def teste(a,b):
+    def soma(a,b):
+        return a + b
+a = 20
