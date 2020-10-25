@@ -67,12 +67,20 @@ function replace_tags_for_double_finds(taged_obj,string){
 }
 
 //----------------------------- puts indent on in bracelets--------------------------------------------------
+function make_bracklets(total){
+    string = ""
+    for(i = 0; i < total; i++){
+        string = string + "}\n"
+        
+    }
+    return string
+}
 
 function puts_bracelets_on_end_scope(string){
      elements = []
      total_chars = 0
      end_line_found = true
-    for(i = 0; i < string.length; i++){
+    for(let i = 0; i < string.length; i++){
 
         if(string[i] == ' ' && end_line_found == true){
            ++total_chars
@@ -94,20 +102,30 @@ function puts_bracelets_on_end_scope(string){
     
     total_bracelets = 0
     open_scope = false
-    for(i = 0; i < elements.length; i++){
-        console.log(i)
+    
+    for(let i = 0; i < elements.length; i++){
+        if(elements[i].size > 0){
+           open_scope = true
+           ++total_bracelets
+        }
+        if(elements[i].size == 0 && open_scope == true){
+            open_scope = false
+                  string = string.substr(0,elements[i].point)
+                  + make_bracklets(total_bracelets) 
+                  + string.substr(elements[i].point, string.length)
+                  
+                  elements = elements.map(function(x){
+                      x.point = x.point + total_bracelets * 2
+                      return x
+                  })
+                 
+            total_bracelets = 0
+        }
     }
-    console.log(elements)
+  
+    return string
 
     
 }
 
-
-
-
-
-valor = 'def teste(a,b):\n  def soma(a,b):\n    return a + b\na = 20\n'
-
-
-//console.log(valor)
-puts_bracelets_on_end_scope(valor)
+//------------------------------open and eddit file
