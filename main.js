@@ -1,6 +1,30 @@
 
 const fs = require('fs')
 
+function replace_all_strings(string,string_to_be_removed,string_to_replace){
+         while(true){
+             string = string.replace(string_to_be_removed,string_to_replace)
+             index = string.indexOf(string_to_be_removed)
+             if(index == -1){
+                 break
+             }
+         }
+         return string
+}
+
+function replaceAt(str, index, chr) {
+    if (index > str.length - 1)
+    return str;
+    return str.substr(0, index) + chr + str.substr(index + 1);
+}
+function create_space(size){
+    var string = ""
+    for(let i =0; i < size;i++){
+        string = string + " "
+    }
+    return string 
+}
+
 //-------------------- removing unhandling text_parts ----------------------------
 
 function get_all_double_find(string,first,end){
@@ -53,7 +77,7 @@ function tag_all_double_find(double_find){
 function replace_double_finds_for_tags(taged_obj,string){
 
     taged_obj.map(function(x){
-         string = string.replace(x.value,x.tag)
+         string = replace_all_strings(string,x.value,x.tag)
     })
     return string
 }
@@ -61,20 +85,19 @@ function replace_double_finds_for_tags(taged_obj,string){
 function replace_tags_for_double_finds(taged_obj,string){
 
     taged_obj.map(function(x){
-        string = string.replace(x.tag,x.value)
+        string = replace_all_strings(string,x.tag,x.value)
    })
    return string
 }
 
-//----------------------------- puts indent on in bracelets--------------------------------------------------
-function make_bracklets(total){
-    string = ""
-    for(i = 0; i < total; i++){
-        string = string + "}\n"
-        
-    }
-    return string
+function get_a_double_find_and_tag_then(string,first,end){
+       double_find = get_all_double_find(string,first,end)
+       taged = tag_all_double_find(double_find)
+       return taged
 }
+
+//----------------------------- puts indent on in bracelets--------------------------------------------------
+
 
 function puts_bracelets_on_end_scope(string){
      elements = []
@@ -99,31 +122,34 @@ function puts_bracelets_on_end_scope(string){
          }
         
     }
-    
-    total_bracelets = 0
-    open_scope = false
-    
-    for(let i = 0; i < elements.length; i++){
-        if(elements[i].size > 0){
-           open_scope = true
-           ++total_bracelets
+
+    elements_with_strings = elements.map(function(x,y){
+     r = {}
+     r.size = x.size
+     if(y < elements.length - 1){
+         r.text = string.slice(elements[y].point, elements[y+1].point) 
+     }
+     return r
+    })
+
+
+    for(let i = 0; i < elements.length - 1; i++){
+
+        if(elements_with_strings[i].size > elements_with_strings[i + 1].size){
+           elements_with_strings[i + 1].text = "}\n" + create_space(elements_with_strings[i - 1].size) + elements_with_strings[i + 1].text 
         }
-        if(elements[i].size == 0 && open_scope == true){
-            open_scope = false
-                  string = string.substr(0,elements[i].point)
-                  + make_bracklets(total_bracelets) 
-                  + string.substr(elements[i].point, string.length)
-                  
-                  elements = elements.map(function(x){
-                      x.point = x.point + total_bracelets * 2
-                      return x
-                  })
-                 
-            total_bracelets = 0
-        }
+         
+           
     }
-  
-    return string
+
+    final_string = ""
+
+    elements_with_strings.map(function (x) {
+        final_string = final_string + x.text
+    })
+    
+
+    return final_string
 
     
 }
@@ -164,29 +190,35 @@ function main(){
 file_name = process.argv[2]
 output    = process.argv[3]
 
-open_file = open_file(file_name)
-
-
-
+opened_file = open_file(file_name)
+code = opened_file
 
 if(file_name == undefined){
     console.log("no file for transpile")
     return
 }
-else if(open_file == false){
+else if(opened_file == false){
    console.log("cound't open the", file_name, "file")
    return
 }
 
-console.log(output)
+hash = get_a_double_find_and_tag_then(code,"{","}")
+list = get_a_double_find_and_tag_then(code,"[","]")
 
-//console.log(file)
 
+code_without_hash = replace_double_finds_for_tags(hash,code)
+cripty_code = replace_double_finds_for_tags(list,code_without_hash)
 
+function_replaced = replace_all_strings(cripty_code,"def","function")
+start_brackelts = replace_all_strings(function_replaced,"):","){")
+
+end_bracklets =  puts_bracelets_on_end_scope(start_brackelts)
+
+//console.log(end_bracklets)
 
 
 }
 
-write_file("teste","eai caralho")
-//main()
+main()
+
 
