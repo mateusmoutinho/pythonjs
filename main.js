@@ -12,18 +12,6 @@ function replace_all_strings(string,string_to_be_removed,string_to_replace){
          return string
 }
 
-function replaceAt(str, index, chr) {
-    if (index > str.length - 1)
-    return str;
-    return str.substr(0, index) + chr + str.substr(index + 1);
-}
-function create_space(size){
-    var string = ""
-    for(let i =0; i < size;i++){
-        string = string + " "
-    }
-    return string 
-}
 
 //-------------------- removing unhandling text_parts ----------------------------
 
@@ -136,7 +124,7 @@ function puts_bracelets_on_end_scope(string){
     for(let i = 0; i < elements.length - 1; i++){
 
         if(elements_with_strings[i].size > elements_with_strings[i + 1].size){
-           elements_with_strings[i + 1].text = "}\n" + create_space(elements_with_strings[i - 1].size) + elements_with_strings[i + 1].text 
+           elements_with_strings[i + 1].text = "}" + elements_with_strings[i + 1].text 
         }
          
            
@@ -174,7 +162,7 @@ function write_file(file_name,content){
         if (err) {
           return console.log(err);
         }
-        console.log(data);
+      
       });
 }
 
@@ -182,6 +170,31 @@ function get_file_name_without_dot(file_name){
     dot = file_name.indexOf(".")
    file = file_name.substr(0,dot)
    return file
+}
+function create_a_valid_file(file_name,string){
+    without_dot = get_file_name_without_dot(file_name)
+    extension = ".js"
+    exist = open_file(without_dot + extension)
+
+    if(exist == false){
+        write_file(without_dot + extension,string)
+        return 
+    }
+    let number = 0
+    
+    while(true){
+        exist = open_file(without_dot + number.toString() + extension)
+       
+        if(exist == false){
+            write_file(without_dot +  number.toString() + extension,string)
+            return 
+        }
+
+        ++number
+
+    }
+    
+   
 }
 //-------------------------------main code--------------------------------------
 
@@ -214,10 +227,19 @@ start_brackelts = replace_all_strings(function_replaced,"):","){")
 
 end_bracklets =  puts_bracelets_on_end_scope(start_brackelts)
 
-//console.log(end_bracklets)
+with_hash = replace_tags_for_double_finds(hash,end_bracklets)
+with_list = replace_tags_for_double_finds(list,end_bracklets)
 
+end_string = with_list
 
+if(output != undefined){
+    write_file(output,end_string)
 }
+else{
+   create_a_valid_file(file_name,end_string)
+}
+}
+
 
 main()
 
