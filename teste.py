@@ -1,8 +1,4 @@
 def soma(a,b):
-    return parseInt(a) + parseInt(b)
-n1 = input("digita um número")
+    return a + b
 
-n2 = input("digita outro número")
-
-#testte , eai
-print(soma(n1,n2))
+print(soma(10,20))
